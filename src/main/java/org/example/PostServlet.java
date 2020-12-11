@@ -26,11 +26,12 @@ public class PostServlet extends HttpServlet {
     public void addFullPost(HttpServletRequest req, HttpServletResponse resp) throws SQLException, ServletException, IOException {
         SecurityContext securityContext = SecurityContext.getInstance();
         String id = "";
-        String postAuthor = "";
-        String publicationDate = "";
-        String postName = "";
-        String postTheme = "";
-        String post = "";
+        String postAuthor;
+        String publicationDate;
+        String postName;
+        String postTheme;
+        String post;
+        String extension;
         int idInt = 0;;
         if (req.getParameter("fullPost") != null) {
             id = req.getParameter("fullPost");
@@ -49,11 +50,14 @@ public class PostServlet extends HttpServlet {
             postName = resultSet.getString("postName");
             postTheme = resultSet.getString("postTheme");
             post = resultSet.getString("post");
+            extension = resultSet.getString("extension");
             req.setAttribute("postAuthor", postAuthor);
             req.setAttribute("publicationDate", publicationDate);
             req.setAttribute("postName", postName);
             req.setAttribute("postTheme", postTheme);
             req.setAttribute("post", post);
+            req.setAttribute("idImg", idInt);
+            req.setAttribute("extension", extension);
             req.getRequestDispatcher("/WEB-INF/pages/post.jsp").forward(req, resp);
         }
     }

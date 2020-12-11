@@ -42,8 +42,11 @@ public class HomeServlet extends HttpServlet {
 
     public void selectPostsFromDataBase(HttpServletRequest req, HttpServletResponse resp) throws SQLException, ServletException, IOException {
         int startPosition = 0;
-        int postPosition = 3;
+        int postPosition = 0;
         int countLines = countLines(req, resp);
+        if (countLines > 0) {
+            postPosition = 3;
+        }
         int position = 0;
         if (req.getParameter("postNewer") != null) {
             String postNever = req.getParameter("postNewer");
@@ -57,8 +60,8 @@ public class HomeServlet extends HttpServlet {
             if (postPosition > countLines) {
                 postPosition = countLines;
             }
-        }
 
+        }
 
         if (req.getParameter("postOlder") != null) {
             String postNever = req.getParameter("postOlder");
@@ -84,26 +87,29 @@ public class HomeServlet extends HttpServlet {
 
 
         int id = 0;
-        String postAuthor = "";
-        String publicationDate = "";
-        String postName = "";
-        String postTheme = "";
+        String postAuthor;
+        String publicationDate;
+        String postName;
+        String postTheme;
+        String extension;
         int count = 1;
         SecurityContext securityContext = SecurityContext.getInstance();
         Connection connection = securityContext.connection();
         Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("select * from posts where draft = 'нет' limit " + startPosition + ", " + postPosition + ";");
+        ResultSet resultSet = statement.executeQuery("select * from posts where draft = 'no' limit " + startPosition + ", " + postPosition + ";");
         while (resultSet.next()) {
             id = resultSet.getInt("id");
             postAuthor = resultSet.getString("postAuthor");
             publicationDate = resultSet.getString("publicationDate");
             postName = resultSet.getString("postName");
             postTheme = resultSet.getString("postTheme");
+            extension = resultSet.getString("extension");
             req.setAttribute("id" + count + "", id);
             req.setAttribute("postAuthor" + count + "", postAuthor);
             req.setAttribute("publicationDate" + count + "", publicationDate);
             req.setAttribute("postName" + count + "", postName);
             req.setAttribute("postTheme" + count + "", postTheme);
+            req.setAttribute("extension" + count + "", extension);
             count++;
         }
         req.setAttribute("startPosition", startPosition);
@@ -117,7 +123,7 @@ public class HomeServlet extends HttpServlet {
         SecurityContext securityContext = SecurityContext.getInstance();
         Connection connection = securityContext.connection();
         Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("select count(*) from posts where draft = 'нет';");
+        ResultSet resultSet = statement.executeQuery("select count(*) from posts where draft = 'no';");
         if (resultSet.next()) {
             countLines = resultSet.getInt(1);
         }

@@ -67,7 +67,7 @@
             <!-- Blog Post -->
             <c:if test="${id1 != null}">
                 <div class="card mb-4">
-                    <img class="card-img-top" src="http://placehold.it/750x300" alt="Card image cap">
+                    <img class="card-img-top" src="/resources/uploads/${id1}.${extension1}" alt="http://placehold.it/750x300">
                     <div class="card-body">
                         <h2 class="card-title">${postName1}</h2>
                         <p class="card-text">${postTheme1}</p>
@@ -86,7 +86,7 @@
             <!-- Blog Post -->
             <c:if test="${id2 != null}">
                 <div class="card mb-4">
-                    <img class="card-img-top" src="http://placehold.it/750x300" alt="Card image cap">
+                    <img class="card-img-top" src="/resources/uploads/${id2}.${extension2}" alt="http://placehold.it/750x300">
                     <div class="card-body">
                         <h2 class="card-title">${postName2}</h2>
                         <p class="card-text">${postTheme2}</p>
@@ -105,7 +105,7 @@
             <!-- Blog Post -->
             <c:if test="${id3 != null}">
                 <div class="card mb-4">
-                    <img class="card-img-top" src="http://placehold.it/750x300" alt="Card image cap">
+                    <img class="card-img-top" src="/resources/uploads/${id3}.${extension3}" alt="http://placehold.it/750x300">
                     <div class="card-body">
                         <h2 class="card-title">${postName3}</h2>
                         <p class="card-text">${postTheme3}</p>
@@ -141,10 +141,18 @@
                 <c:when test="${postPosition < countLines}">
                 <li class="page-item">
                     </c:when>
+                    <c:when test="${postPosition == 0}">
+                <li class="page-item disabled">
+                    </c:when>
                     <c:when test="${postPosition == countLines}">
                 <li class="page-item disabled">
                     </c:when>
+                        <c:when test="${countLines < 4}">
+                    <li class="page-item disabled">
+                        </c:when>
+
                     </c:choose>
+
 
                     <c:url value="/" var="postNewer">
                         <c:param name="postNewer" value="${postPosition}"/>

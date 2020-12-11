@@ -2,18 +2,21 @@ package org.example;
 
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+@MultipartConfig
 @WebServlet(urlPatterns = "/admin")
 public class AdminServlet extends HttpServlet {
+    public static final String UPLOADS = "resources/uploads";
     private String postAuthor;
     private String publicationDate;
     private String postName;
@@ -57,6 +60,11 @@ public class AdminServlet extends HttpServlet {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        try {
+            saveFile(req);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
 
@@ -67,7 +75,7 @@ public class AdminServlet extends HttpServlet {
         connection.setAutoCommit(false);
         if (publicationDate == null) {
             try {
-                statement.executeUpdate("insert into posts (postAuthor, postName, postTheme, post, draft) value ('"+postAuthor+"', '"+postName+"', '"+postTheme+"', '"+post+"', '"+draft+"');");
+                statement.executeUpdate("insert into posts (postAuthor, postName, postTheme, post, draft) value ('" + postAuthor + "', '" + postName + "', '" + postTheme + "', '" + post + "', '" + draft + "');");
                 connection.setAutoCommit(true);
             } catch (Exception exception) {
                 connection.rollback();
@@ -75,7 +83,7 @@ public class AdminServlet extends HttpServlet {
             }
         } else {
             try {
-                statement.executeUpdate("insert into posts (postAuthor, publicationDate ,postName, postTheme, post, draft) value ('"+postAuthor+"', '"+publicationDate+"','"+postName+"', '"+postTheme+"', '"+post+"', '"+draft+"');");
+                statement.executeUpdate("insert into posts (postAuthor, publicationDate ,postName, postTheme, post, draft) value ('" + postAuthor + "', '" + publicationDate + "','" + postName + "', '" + postTheme + "', '" + post + "', '" + draft + "');");
                 connection.setAutoCommit(true);
             } catch (Exception exception) {
                 connection.rollback();
@@ -84,5 +92,27 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
+    public void saveFile(HttpServletRequest req) throws SQLException, IOException, ServletException {
+        Part part = req.getPart("image");
+        SecurityContext securityContext = SecurityContext.getInstance();
+        Connection connection = securityContext.connection();
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select id from posts order by id desc limit 1;");
+        int id = 0;
+        while (resultSet.next()) {
+            id = resultSet.getInt(1);
+        }
+        String contentDisposition = part.getHeader("Content-Disposition");
+        int start = contentDisposition.indexOf("filename=");
+        start += "filename=".length();
+        int end = contentDisposition.lastIndexOf("\"");
+        String filename = contentDisposition.substring(start + 1, end);
+        int indexExpansion = filename.indexOf(".");
+        String extension = filename.substring(indexExpansion + 1, filename.length());
+        String uploadsDirUrl = getServletContext().getRealPath(UPLOADS);
+        String absolutePathToFile = uploadsDirUrl + "/" + id + "." + extension;
+        part.write(absolutePathToFile);
+        statement.executeUpdate("update posts set extension = '"+extension+"' where id = "+id+";");
+    }
 
 }

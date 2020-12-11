@@ -5,11 +5,16 @@
 <html>
 <head>
     <title>Title</title>
-    <script src="https://cdn.tiny.cloud/1/5visbkrzsmef4spvcdb2hatgn4e60j4uxqoh6hqabnbihb9x/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/5visbkrzsmef4spvcdb2hatgn4e60j4uxqoh6hqabnbihb9x/tinymce/5/tinymce.min.js"
+            referrerpolicy="origin"></script>
 </head>
 <body>
 <p>Admin page</p>
-<form method="post">
+<c:url value="/" var="link1"></c:url>
+<a href="${link1}">Вернуться на главную страницу</a>
+<p></p>
+<p></p>
+<form method="post" enctype="multipart/form-data">
     <label for="postAuthor">Введите имя и фамилию автора поста</label>
     <p></p>
     <input id="postAuthor" name="postAuthor" size="70"/>
@@ -37,6 +42,7 @@
     </label>
     <p></p>
     <input type="submit"/>
+    &nbsp;<label>Загрузить изображение &nbsp;<input type="file" name="image"></label>
     <c:url value="/delete" var="deletePost">
         <c:param name="deletePost" value="delete"/>
     </c:url>
