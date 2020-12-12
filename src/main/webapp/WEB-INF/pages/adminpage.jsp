@@ -14,6 +14,7 @@
 <a href="${link1}">Вернуться на главную страницу</a>
 <p></p>
 <p></p>
+
 <form method="post" enctype="multipart/form-data">
     <label for="postAuthor">Введите имя и фамилию автора поста</label>
     <p></p>

@@ -1,18 +1,18 @@
 package org.example;
 
 
+import com.mysql.cj.xdevapi.Session;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 @MultipartConfig
 @WebServlet(urlPatterns = "/admin")
 public class AdminServlet extends HttpServlet {
@@ -28,7 +28,6 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.getRequestDispatcher("WEB-INF/pages/adminpage.jsp");
-
     }
 
     @Override
@@ -61,7 +60,7 @@ public class AdminServlet extends HttpServlet {
             throwables.printStackTrace();
         }
         try {
-            saveFile(req);
+            saveFile(req, resp);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -92,7 +91,7 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
-    public void saveFile(HttpServletRequest req) throws SQLException, IOException, ServletException {
+    public void saveFile(HttpServletRequest req, HttpServletResponse resp) throws SQLException, IOException, ServletException {
         Part part = req.getPart("image");
         SecurityContext securityContext = SecurityContext.getInstance();
         Connection connection = securityContext.connection();
@@ -111,8 +110,33 @@ public class AdminServlet extends HttpServlet {
         String extension = filename.substring(indexExpansion + 1, filename.length());
         String uploadsDirUrl = getServletContext().getRealPath(UPLOADS);
         String absolutePathToFile = uploadsDirUrl + "/" + id + "." + extension;
-        part.write(absolutePathToFile);
-        statement.executeUpdate("update posts set extension = '"+extension+"' where id = "+id+";");
+        String contentType = contentType(part);
+        if (contentType.equals("image")) {
+            part.write(absolutePathToFile);
+            connection.setAutoCommit(false);
+            try {
+                statement.executeUpdate("update posts set extension = '" + extension + "' where id = " + id + ";");
+                connection.setAutoCommit(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                connection.rollback();
+            }
+        } else {
+            connection.setAutoCommit(false);
+            try {
+                statement.executeUpdate("delete from posts where id = " + id + ";");
+                connection.setAutoCommit(true);
+            } catch (Exception e) {
+                connection.rollback();
+                e.printStackTrace();
+            }
+        }
     }
 
+    private String contentType(Part part) {
+        if (part == null) return null;
+        String contentDisposition = part.getContentType();
+        int end = contentDisposition.lastIndexOf("/");
+        return contentDisposition.substring(0, end);
+    }
 }
