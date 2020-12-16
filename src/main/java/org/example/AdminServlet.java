@@ -27,7 +27,7 @@ public class AdminServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("WEB-INF/pages/adminpage.jsp");
+        req.getRequestDispatcher("WEB-INF/pages/adminpage.jsp").forward(req, resp);
     }
 
     @Override
@@ -92,6 +92,7 @@ public class AdminServlet extends HttpServlet {
     }
 
     public void saveFile(HttpServletRequest req, HttpServletResponse resp) throws SQLException, IOException, ServletException {
+        HttpSession session = req.getSession();
         Part part = req.getPart("image");
         SecurityContext securityContext = SecurityContext.getInstance();
         Connection connection = securityContext.connection();
@@ -116,7 +117,9 @@ public class AdminServlet extends HttpServlet {
             connection.setAutoCommit(false);
             try {
                 statement.executeUpdate("update posts set extension = '" + extension + "' where id = " + id + ";");
-                connection.setAutoCommit(true);
+                session.removeAttribute("noImage");
+                resp.sendRedirect(getServletContext().getContextPath()+ req.getRequestURI());
+                connection.commit();
             } catch (Exception e) {
                 e.printStackTrace();
                 connection.rollback();
@@ -125,7 +128,9 @@ public class AdminServlet extends HttpServlet {
             connection.setAutoCommit(false);
             try {
                 statement.executeUpdate("delete from posts where id = " + id + ";");
-                connection.setAutoCommit(true);
+                session.setAttribute("noImage", "1");
+                resp.sendRedirect(getServletContext().getContextPath()+ req.getRequestURI());
+                connection.commit();
             } catch (Exception e) {
                 connection.rollback();
                 e.printStackTrace();
